@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>牡蠣カウンター</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <h1>牡蠣カウンター v1.0.0-beta.1</h1>
+
+    <div class="controls">
+        <button onclick="startRecognition()">開始</button>
+        <button onclick="stopRecognition()">終了</button>
+        <button onclick="downloadCSV()">ダウンロード</button>
+    </div>
+
+    <div class="input-box" id="speech-output">
+        <!-- 発言内容がここに表示されます -->
+    </div>
+
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>長さ(cm)</th>
+                <th>重さ(g)</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script src="js/script.js"></script>
+
+</body>
+
+</html>

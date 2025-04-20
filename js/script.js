@@ -4,9 +4,6 @@ let lastCommand = '';
 let currentRowIndex = null;
 let processingFlg = 0
 
-// ボタン初期状態設定
-enabledStartButton();
-
 function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -20,17 +17,13 @@ function initSpeechRecognition() {
     recognizer.interimResults = true;
 
     recognizer.onresult = function (event) {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            transcript += event.results[i][0].transcript;
-            console.log(event.results[i][0].transcript)
-        }
+        const transcript = event.results[event.results.length - 1][0].transcript;
+        console.log(transcript)
 
         document.getElementById('speech-output').textContent = transcript;
 
         // 「次」→ 行追加
         if (!processingFlg && transcript.includes("次") && !isBlankLastRow()) {
-            transcript = '';
             processingFlg = 1;
             setTimeout(() => {
                 addRow();
@@ -43,10 +36,10 @@ function initSpeechRecognition() {
         const transcriptForMatch = removeBeforeWord(transcript);
 
         // 数値の抽出
-        const cmMatch = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(cm|CM|センチ)/);
-        const gMatch = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(g|G|グラム)/);
+        const cmMatches = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(cm|CM|センチ)/g);
+        const gMatches = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(g|G|グラム)/g);
 
-        if (!processingFlg && (cmMatch || gMatch)) {
+        if (!processingFlg && (cmMatches || gMatches)) {
             const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
             if (currentRowIndex === null) {
                 // 行が存在しなければ追加
@@ -55,11 +48,11 @@ function initSpeechRecognition() {
 
             const rows = table.getElementsByTagName('tr');
             const targetRow = rows[currentRowIndex] || rows[rows.length - 1];
-            if (cmMatch) {
-                targetRow.cells[0].textContent = cmMatch[1]; // 長さ
+            if (cmMatches?.length) {
+                targetRow.cells[0].textContent = cmMatches[cmMatches.length - 1].match(/\d+(?:\.\d+)?/)[0]; // 長さ
             }
-            if (gMatch) {
-                targetRow.cells[1].textContent = gMatch[1]; // 重さ
+            if (gMatches?.length) {
+                targetRow.cells[1].textContent = gMatches[gMatches.length - 1].match(/\d+(?:\.\d+)?/)[0]; // 重さ
             }
         }
 
@@ -85,7 +78,10 @@ function startRecognition() {
     if (recognition && !isRecognizing) {
         recognition.start();
         disabledStartButton();
-        addRow();
+        if (!isBlankLastRow()) {
+            // 末尾行が空欄でない場合、新規行を追加
+            addRow();
+        }
         isRecognizing = true;
         console.log('音声認識を開始しました');
     }
@@ -102,6 +98,10 @@ function stopRecognition() {
 
 function isBlankLastRow() {
     const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+    console.log(table.rows.length)
+    if (!table.rows.length) {
+        return false;
+    }
     const rows = table.getElementsByTagName('tr');
     const targetRow = rows[currentRowIndex] || rows[rows.length - 1];
     return !targetRow.cells[0].textContent || !targetRow.cells[1].textContent
@@ -115,6 +115,12 @@ function addRow() {
     cell1.textContent = "";
     cell2.textContent = "";
     currentRowIndex = table.rows.length - 1; // 新しく追加された行を対象に
+    updateDownloadButtonState();
+}
+
+function deleteRow() {
+    // 未実装
+    updateDownloadButtonState();
 }
 
 function removeBeforeWord(text, keyword = '次') {
@@ -165,12 +171,22 @@ function downloadCSV() {
     document.body.removeChild(link);
 }
 
-function enabledStartButton(){
+function enabledStartButton() {
     document.getElementById("start-btn").disabled = false;
     document.getElementById("end-btn").disabled = true;
 }
 
-function disabledStartButton(){
+function disabledStartButton() {
     document.getElementById("start-btn").disabled = true;
     document.getElementById("end-btn").disabled = false;
+}
+
+function updateDownloadButtonState() {
+    // 1. ダウンロードボタンの制御関数
+    const table = document.getElementById("data-table");
+    const downloadBtn = document.getElementById("download-btn");
+
+    const dataRowCount = table.getElementsByTagName("tbody")[0].rows.length;
+
+    downloadBtn.disabled = dataRowCount === 0;
 }

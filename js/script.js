@@ -4,6 +4,9 @@ let lastCommand = '';
 let currentRowIndex = null;
 let processingFlg = 0
 
+// ボタン初期状態設定
+enabledStartButton();
+
 function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -81,6 +84,7 @@ function startRecognition() {
     }
     if (recognition && !isRecognizing) {
         recognition.start();
+        disabledStartButton();
         addRow();
         isRecognizing = true;
         console.log('音声認識を開始しました');
@@ -90,6 +94,7 @@ function startRecognition() {
 function stopRecognition() {
     if (recognition && isRecognizing) {
         recognition.stop();
+        enabledStartButton();
         isRecognizing = false;
         console.log('音声認識を停止しました');
     }
@@ -158,4 +163,14 @@ function downloadCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+function enabledStartButton(){
+    document.getElementById("start-btn").disabled = false;
+    document.getElementById("end-btn").disabled = true;
+}
+
+function disabledStartButton(){
+    document.getElementById("start-btn").disabled = true;
+    document.getElementById("end-btn").disabled = false;
 }

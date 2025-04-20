@@ -66,6 +66,7 @@ function initSpeechRecognition() {
         if (isRecognizing) {
             recognizer.start(); // 自動再開
         }
+        document.getElementById('speech-output').textContent = ""
     };
 
     return recognizer;
@@ -112,8 +113,8 @@ function addRow() {
     const newRow = table.insertRow();
     const cell1 = newRow.insertCell(0);
     const cell2 = newRow.insertCell(1);
-    cell1.textContent = "";
-    cell2.textContent = "";
+    makeCellEditable(cell1);
+    makeCellEditable(cell2);
     currentRowIndex = table.rows.length - 1; // 新しく追加された行を対象に
     updateDownloadButtonState();
 }
@@ -121,6 +122,36 @@ function addRow() {
 function deleteRow() {
     // 未実装
     updateDownloadButtonState();
+}
+
+function makeCellEditable(cell) {
+    cell.contentEditable = true;
+
+    // 編集終了時にバリデーション
+    cell.addEventListener("blur", function () {
+        const value = cell.innerText.trim();
+
+        // 半角数値（小数もOK）にマッチするか確認
+        if (!/^\d+(\.\d+)?$/.test(value)) {
+            alert("半角数字のみ入力できます");
+            cell.innerText = ""; // または以前の値に戻すよう保存しておいても可
+        }
+    });
+
+    // 入力中に制限かけたいなら以下も追加
+    cell.addEventListener("input", function () {
+        const value = cell.innerText;
+        if (/[^0-9.]/.test(value)) {
+            cell.innerText = value.replace(/[^0-9.]/g, "");
+            // カーソルを末尾に置く（整形時に必要）
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(cell);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+    });
 }
 
 function removeBeforeWord(text, keyword = '次') {
@@ -182,11 +213,9 @@ function disabledStartButton() {
 }
 
 function updateDownloadButtonState() {
-    // 1. ダウンロードボタンの制御関数
+    // ダウンロードボタンの制御関数
     const table = document.getElementById("data-table");
     const downloadBtn = document.getElementById("download-btn");
-
     const dataRowCount = table.getElementsByTagName("tbody")[0].rows.length;
-
     downloadBtn.disabled = dataRowCount === 0;
 }

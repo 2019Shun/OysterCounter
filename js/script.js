@@ -25,7 +25,13 @@ function initSpeechRecognition() {
 
     recognizer.onresult = function (event) {
         const transcript = event.results[event.results.length - 1][0].transcript;
-        console.log(transcript)
+
+        // 音声に「終了」が含まれていたら認識停止 & 終了処理
+        if (transcript.includes("終了")) {
+            recognition.stop();
+            stopRecognition(); // 終了ボタン押下時と同じ処理を呼び出す
+            return;
+        }
 
         document.getElementById('speech-output').textContent = transcript;
 

@@ -4,6 +4,13 @@ let lastCommand = '';
 let currentRowIndex = null;
 let processingFlg = 0
 
+window.addEventListener("beforeunload", function (event) {
+    // ページを離れる際にテーブルにデータがある場合は確認ダイアログを表示する
+    if (isExistTableDate()) {
+        event.preventDefault();
+    }
+});
+
 function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -99,13 +106,17 @@ function stopRecognition() {
 
 function isBlankLastRow() {
     const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
-    console.log(table.rows.length)
     if (!table.rows.length) {
         return false;
     }
     const rows = table.getElementsByTagName('tr');
     const targetRow = rows[currentRowIndex] || rows[rows.length - 1];
     return !targetRow.cells[0].textContent || !targetRow.cells[1].textContent
+}
+
+function isExistTableDate() {
+    const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+    return !!table.rows.length
 }
 
 function addRow() {

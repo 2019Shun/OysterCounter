@@ -54,10 +54,10 @@ function initSpeechRecognition() {
         const transcriptForMatch = rowAddStringIndex !== -1 ? transcript.slice(rowAddStringIndex) : transcript;
 
         // 数値の抽出
-        const cmMatches = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(cm|CM|センチ)/g);
-        const gMatches = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(g|G|グラム)/g);
+        const lengthMatches = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(ミリ|ミリメートル|mm)/g);
+        const weightMatches = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(g|G|グラム)/g);
 
-        if (!processingFlg && (cmMatches || gMatches)) {
+        if (!processingFlg && (lengthMatches || weightMatches)) {
             const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
             if (currentRowIndex === null) {
                 // 行が存在しなければ追加
@@ -66,11 +66,11 @@ function initSpeechRecognition() {
 
             const rows = table.getElementsByTagName('tr');
             const targetRow = rows[currentRowIndex] || rows[0];
-            if (cmMatches?.length) {
-                targetRow.cells[0].textContent = cmMatches[cmMatches.length - 1].match(/\d+(?:\.\d+)?/)[0]; // 長さ
+            if (lengthMatches?.length) {
+                targetRow.cells[0].textContent = lengthMatches[lengthMatches.length - 1].match(/\d+(?:\.\d+)?/)[0]; // 長さ
             }
-            if (gMatches?.length) {
-                targetRow.cells[1].textContent = gMatches[gMatches.length - 1].match(/\d+(?:\.\d+)?/)[0]; // 重さ
+            if (weightMatches?.length) {
+                targetRow.cells[1].textContent = weightMatches[weightMatches.length - 1].match(/\d+(?:\.\d+)?/)[0]; // 重さ
             }
         }
 

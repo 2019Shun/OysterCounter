@@ -60,7 +60,7 @@ function initSpeechRecognition() {
             }
 
             const rows = table.getElementsByTagName('tr');
-            const targetRow = rows[currentRowIndex] || rows[rows.length - 1];
+            const targetRow = rows[currentRowIndex] || rows[0];
             if (cmMatches?.length) {
                 targetRow.cells[0].textContent = cmMatches[cmMatches.length - 1].match(/\d+(?:\.\d+)?/)[0]; // 長さ
             }
@@ -116,7 +116,7 @@ function isBlankLastRow() {
         return false;
     }
     const rows = table.getElementsByTagName('tr');
-    const targetRow = rows[currentRowIndex] || rows[rows.length - 1];
+    const targetRow = rows[currentRowIndex] || rows[0];
     return !targetRow.cells[0].textContent || !targetRow.cells[1].textContent
 }
 
@@ -127,12 +127,12 @@ function isExistTableDate() {
 
 function addRow() {
     const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
-    const newRow = table.insertRow();
+    const newRow = table.insertRow(0);
     const cell1 = newRow.insertCell(0);
     const cell2 = newRow.insertCell(1);
     makeCellEditable(cell1);
     makeCellEditable(cell2);
-    currentRowIndex = table.rows.length - 1; // 新しく追加された行を対象に
+    currentRowIndex = 0; // 新しく追加された行番号を保持
     updateDownloadButtonState();
 }
 

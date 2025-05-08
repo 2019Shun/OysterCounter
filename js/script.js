@@ -1,3 +1,5 @@
+const rowAddTriggers = ["次", "はい"]; // 行追加トリガー単語
+
 let recognition;
 let isRecognizing = false;
 let lastCommand = '';
@@ -35,8 +37,9 @@ function initSpeechRecognition() {
 
         document.getElementById('speech-output').textContent = transcript;
 
-        // 「次」→ 行追加
-        if (!processingFlg && transcript.includes("次") && !isBlankLastRow()) {
+        // 「次」or「はい」→ 行追加
+        // 行追加中だったり、入力対象行がNULLの場合は追加しない
+        if (!processingFlg && rowAddTriggers.some(trigger => transcript.includes(trigger)) && !isBlankTgtRow()) {
             processingFlg = 1;
             setTimeout(() => {
                 addRow();
@@ -45,8 +48,10 @@ function initSpeechRecognition() {
             return;
         }
 
-        // 「次」という単語の前の部分を削除
-        const transcriptForMatch = removeBeforeWord(transcript);
+        // 「次」or「はい」という単語の前の部分を削除
+        // 連続で発話された際に前回値が入力される不具合に対応するため
+        const rowAddStringIndex = Math.max(...rowAddTriggers.map(keyword => transcript.lastIndexOf(keyword)))
+        const transcriptForMatch = rowAddStringIndex !== -1 ? transcript.slice(rowAddStringIndex) : transcript;
 
         // 数値の抽出
         const cmMatches = transcriptForMatch.match(/(\d+(?:\.\d+)?)\s*(cm|CM|センチ)/g);
@@ -92,7 +97,7 @@ function startRecognition() {
     if (recognition && !isRecognizing) {
         recognition.start();
         disabledStartButton();
-        if (!isBlankLastRow()) {
+        if (!isBlankTgtRow()) {
             // 末尾行が空欄でない場合、新規行を追加
             addRow();
         }
@@ -110,7 +115,7 @@ function stopRecognition() {
     }
 }
 
-function isBlankLastRow() {
+function isBlankTgtRow() {
     const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
     if (!table.rows.length) {
         return false;
@@ -169,15 +174,6 @@ function makeCellEditable(cell) {
             sel.addRange(range);
         }
     });
-}
-
-function removeBeforeWord(text, keyword = '次') {
-    const index = text.lastIndexOf(keyword);
-    if (index !== -1) {
-        return text.slice(index); // 「次」以降を残す
-    } else {
-        return text; // 「次」がない場合はそのまま返す
-    }
 }
 
 function downloadCSV() {

@@ -125,6 +125,9 @@ function stopRecognition() {
             }
         }
 
+        // 1行も入力せず終了した際にダウンロードボタンを非活性にする
+        updateDownloadButtonState();
+
         console.log('音声認識を停止しました');
     }
 }

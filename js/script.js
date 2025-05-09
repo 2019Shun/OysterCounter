@@ -1,4 +1,4 @@
-const rowAddTriggers = ["次", "はい"]; // 行追加トリガー単語
+const rowAddTriggers = ["次", "はい", "ハイ"]; // 行追加トリガー単語
 
 let recognition;
 let isRecognizing = false;
@@ -111,6 +111,20 @@ function stopRecognition() {
         recognition.stop();
         enabledStartButton();
         isRecognizing = false;
+
+        // 終了した際に入力対象行が空だったらその行を削除する
+        const table = document.getElementById("data-table");
+        const tbody = table.getElementsByTagName("tbody")[0];
+        const rows = tbody.rows;
+        if (rows.length > 0) {
+            const tgtRow = rows[currentRowIndex] || rows[0];
+            const length = tgtRow.cells[0].innerText.trim();
+            const weight = tgtRow.cells[1].innerText.trim();
+            if (!length && !weight) {
+                tbody.deleteRow(0);
+            }
+        }
+
         console.log('音声認識を停止しました');
     }
 }

@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>牡蠣カウンター</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦪</text></svg>">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <h1>牡蠣カウンター β版 (beta.3) </h1>
+    <h1>牡蠣カウンター β版 (beta.4) </h1>
 
     <div class="controls">
         <button id="start-btn" onclick="startRecognition()">開始</button>
@@ -22,18 +24,60 @@
     </div>
 
     <table id="data-table">
+        <colgroup>
+            <col style="width: 40%;">
+            <col style="width: 40%;">
+            <col style="width: 20%;">
+        </colgroup>
         <thead>
             <tr>
-                <th>長さ(cm)</th>
+                <th>長さ(mm)</th>
                 <th>重さ(g)</th>
+                <th>メモ</th>
+                <th style="display: none;">MemoHidden</th>
             </tr>
         </thead>
         <tbody>
         </tbody>
     </table>
 
+    <!-- メモ用モーダル -->
+    <div id="memo-modal" class="modal hidden">
+        <div class="modal-content">
+            <textarea id="memo-input" placeholder="メモを入力"></textarea>
+            <button id="memo-save">保存</button>
+            <button id="memo-cancel">キャンセル</button>
+        </div>
+    </div>
+
+    <!-- メモ用オーバーレイ -->
+    <div id="overlay" class="hidden"></div>
+
     <script src="js/script.js"></script>
 
+    <div class="usage-guide">
+        <h3>使い方ガイド</h3>
+        <ul>
+            <li><strong>開始</strong>を押すと音声入力が始まります。</li>
+            <li>「100ミリ」「200グラム」などと話すと、テーブルに値が入力されます。</li>
+            <li>「次」または「はい」と言うと新しい行が追加されます。</li>
+            <li>「メモ」と言うとメモ入力モーダルが開きます。</li>
+            <ul>
+                <li>「保存」や「キャンセル」も音声で操作できます。</li>
+                <li>音声入力中はメモアイコンをクリックすることができません。</li>
+            </ul>
+            <li>「終了」と言うと音声入力を終了します。</li>
+            <li>入力後、<strong>ダウンロード</strong>ボタンでCSVファイルを保存できます。</li>
+        </ul>
+        <p>
+            より詳細な使い方については
+            <a href="https://github.com/2019Shun/OysterCounter/blob/master/readme.md" target="_blank"
+                rel="noopener noreferrer">
+                こちらのドキュメント
+            </a>
+            をご覧ください。
+        </p>
+    </div>
 </body>
 
 </html>

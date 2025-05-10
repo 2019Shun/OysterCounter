@@ -7,8 +7,8 @@ let processingFlg = 0
 
 let currentMemoIndex = null;
 let isMemoMode = false;
-let dispFinalMemo = null;
-let dispInterimMemo = null;
+let confirmedMemo = '';
+let memoStartResultIndex = null;
 
 window.addEventListener("beforeunload", function (event) {
     // ページを離れる際にテーブルにデータがある場合は確認ダイアログを表示する
@@ -78,6 +78,7 @@ function initSpeechRecognition() {
                 currentMemoIndex = document.getElementById('data-table').getElementsByTagName('tbody')[0].rows.length - 1;
                 openMemoModal();
                 isMemoMode = true;
+                memoStartResultIndex = event.resultIndex;
                 return;
             }
 
@@ -121,8 +122,30 @@ function initSpeechRecognition() {
             }
 
             // 発言をメモ欄に追加
+            // 認識が完了するまでは灰色で表示する
             const input = document.getElementById("memo-input");
-            input.value += (input.value ? " " : "") + transcript;
+            let unconfirmedMemo = ''; // 暫定(灰色)の認識結果
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              let tmpTranscript = event.results[i][0].transcript;
+              console.log(i)
+              console.log(memoStartResultIndex)
+              console.log(tmpTranscript)
+
+              // メモモーダルを開いた際の「メモ」という発言は含めない
+              if (i <= memoStartResultIndex){
+                const tmpMemoIndex = tmpTranscript.lastIndexOf("メモ");
+                console.log(tmpMemoIndex)
+                tmpTranscript = tmpMemoIndex !== -1 ? tmpTranscript.slice(tmpMemoIndex+2) : tmpTranscript;
+              }
+
+              // 確定した発言情報とそれ以外を区別して保持する（表示する際は同じスタイル）
+              if (event.results[i].isFinal) {
+                confirmedMemo += tmpTranscript;
+              } else {
+                unconfirmedMemo = tmpTranscript;
+              }
+            }
+            input.value = confirmedMemo + unconfirmedMemo;
         }
 
     };
@@ -332,9 +355,9 @@ function openMemoModal() {
     // 選択された行のメモ情報を取得
     // data-indexは追加された順に採番されるため、そこからテーブル行数の逆数をとることでレコード情報を取得する
     const row = document.querySelector("#data-table tbody").rows[rowNum - currentMemoIndex - 1];
-    const hiddenMemoCell = row.cells[3]; // 非表示のメモセル
+    confirmedMemo = row.cells[3].textContent || "";
 
-    document.getElementById("memo-input").value = hiddenMemoCell.textContent || "";
+    document.getElementById("memo-input").value = confirmedMemo;
     document.getElementById("memo-modal").classList.remove("hidden");
     document.getElementById('overlay').classList.remove('hidden');
 }

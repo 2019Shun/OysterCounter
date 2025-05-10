@@ -19,6 +19,11 @@ window.addEventListener("beforeunload", function (event) {
 
 document.addEventListener("click", function (e) {
     if (e.target.classList.contains("memo-icon")) {
+        // 音声入力中はメモアイコンをクリックできないように制御
+        if (isRecognizing) {
+            return
+        }
+        
         // data-index属性を取得してcurrentMemoIndexに代入
         currentMemoIndex = parseInt(e.target.getAttribute("data-index"));
 
@@ -115,7 +120,7 @@ function initSpeechRecognition() {
                 saveMemo();
                 isMemoMode = false;
             }
-            
+
             if (transcript.includes("キャンセル")) {
                 cancelMemo();
                 isMemoMode = false;
@@ -126,24 +131,24 @@ function initSpeechRecognition() {
             const input = document.getElementById("memo-input");
             let unconfirmedMemo = ''; // 暫定(灰色)の認識結果
             for (let i = event.resultIndex; i < event.results.length; i++) {
-              let tmpTranscript = event.results[i][0].transcript;
-              console.log(i)
-              console.log(memoStartResultIndex)
-              console.log(tmpTranscript)
+                let tmpTranscript = event.results[i][0].transcript;
+                console.log(i)
+                console.log(memoStartResultIndex)
+                console.log(tmpTranscript)
 
-              // メモモーダルを開いた際の「メモ」という発言は含めない
-              if (i <= memoStartResultIndex){
-                const tmpMemoIndex = tmpTranscript.lastIndexOf("メモ");
-                console.log(tmpMemoIndex)
-                tmpTranscript = tmpMemoIndex !== -1 ? tmpTranscript.slice(tmpMemoIndex+2) : tmpTranscript;
-              }
+                // メモモーダルを開いた際の「メモ」という発言は含めない
+                if (i <= memoStartResultIndex) {
+                    const tmpMemoIndex = tmpTranscript.lastIndexOf("メモ");
+                    console.log(tmpMemoIndex)
+                    tmpTranscript = tmpMemoIndex !== -1 ? tmpTranscript.slice(tmpMemoIndex + 2) : tmpTranscript;
+                }
 
-              // 確定した発言情報とそれ以外を区別して保持する（表示する際は同じスタイル）
-              if (event.results[i].isFinal) {
-                confirmedMemo += tmpTranscript;
-              } else {
-                unconfirmedMemo = tmpTranscript;
-              }
+                // 確定した発言情報とそれ以外を区別して保持する（表示する際は同じスタイル）
+                if (event.results[i].isFinal) {
+                    confirmedMemo += tmpTranscript;
+                } else {
+                    unconfirmedMemo = tmpTranscript;
+                }
             }
             input.value = confirmedMemo + unconfirmedMemo;
         }

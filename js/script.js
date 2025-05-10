@@ -119,11 +119,13 @@ function initSpeechRecognition() {
             if (transcript.includes("保存")) {
                 saveMemo();
                 isMemoMode = false;
+                return;
             }
 
             if (transcript.includes("キャンセル")) {
                 cancelMemo();
                 isMemoMode = false;
+                return;
             }
 
             // 発言をメモ欄に追加
